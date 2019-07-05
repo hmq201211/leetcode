@@ -31,7 +31,6 @@ public class Solution {
         if (root.left == null && root.right == null) {
             return 1;
         }
-        TreeNode current = root;
         Queue<TreeNode> queue = new LinkedList<>();
         queue.offer(root);
         queue.offer(null);
