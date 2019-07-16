@@ -99,5 +99,32 @@ class Solution {
         System.out.println(toReturn);
     }
 
+    private String centerSpread(String s, int length, int centerLeft, int centerRight) {
+        while (centerLeft >= 0 && centerRight < length && s.charAt(centerLeft) == s.charAt(centerRight)) {
+            centerLeft--;
+            centerRight++;
+        }
+        return s.substring(centerLeft + 1, centerRight);
+    }
+
+    public String longestPalindrome3(String s) {
+        int length = s.length();
+        if (length == 0) {
+            return "";
+        }
+        int longestPalindrome = 1;
+        String longestPalindromeString = s.substring(0, 1);
+        for (int i = 0; i < length - 1; i++) {
+            String odd = centerSpread(s, length, i, i);
+            String even = centerSpread(s, length, i, i + 1);
+            String result = odd.length() > even.length() ? odd : even;
+            if (result.length() > longestPalindrome) {
+                longestPalindrome = result.length();
+                longestPalindromeString = result;
+            }
+        }
+        return longestPalindromeString;
+    }
+
 
 }
