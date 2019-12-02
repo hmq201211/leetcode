@@ -90,15 +90,6 @@ class Solution {
         return newString.substring(maxI - p[maxI] + 1, maxI + p[maxI]).replace("#", "");
     }
 
-    public static void main(String[] args) {
-        String test = "abccbasdduadjasddddjdsjdjsjdsjd";
-        Solution solution = new Solution();
-        String toReturn = solution.longestPalindrome2(test);
-        String correct = solution.longestPalindrome(test);
-        System.out.println(correct);
-        System.out.println(toReturn);
-    }
-
     private String centerSpread(String s, int length, int centerLeft, int centerRight) {
         while (centerLeft >= 0 && centerRight < length && s.charAt(centerLeft) == s.charAt(centerRight)) {
             centerLeft--;
@@ -126,5 +117,58 @@ class Solution {
         return longestPalindromeString;
     }
 
+    /**
+     * @Description: main
+     * test method
+     * @Params: [args]
+     * @Create: 2019/12/2 11:24
+     * @Return: void
+     */
+    public static void main(String[] args) {
+        String test = "abba";
+        Solution solution = new Solution();
+        System.out.println(solution.longestPalindromeBruteForce(test));
+    }
+
+    /**
+     * @Description: isPalindrome
+     * helper function for brute force solution
+     * it accepts a string and then test the string is palindrome or not
+     * @Params: [s]
+     * @Create: 2019/12/2 11:02
+     * @Return: boolean
+     */
+    private static boolean isPalindrome(String s) {
+        final int length = s.length();
+        for (int i = 0; i < length / 2; i++) {
+            if (s.charAt(i) != s.charAt(length - 1 - i))
+                return false;
+        }
+        return true;
+    }
+
+    /**
+     * @Description: longestPalindromeBruteForce
+     * Brute force approach to collect all the possible candidates and then test the candidate is Palindromic or not
+     * if it's palindromic and its length is bigger than the max then change the answer to the candidate and update the max(length)
+     * @Params: [s]
+     * @Create: 2019/12/2 11:20
+     * @Return: java.lang.String
+     */
+    public String longestPalindromeBruteForce(String s) {
+        String toReturn = "";
+        int max = 0;
+        final int length = s.length();
+        for (int i = 0; i < length; i++) {
+            for (int j = i + 1; j <= length; j++) {
+                String candidate = s.substring(i, j);
+                if (isPalindrome(candidate) && candidate.length() > max) {
+                    toReturn = candidate;
+                    max = candidate.length();
+                }
+            }
+        }
+        return toReturn;
+    }
 
 }
