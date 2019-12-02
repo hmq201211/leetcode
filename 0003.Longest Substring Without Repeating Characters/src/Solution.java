@@ -26,25 +26,6 @@ import java.util.HashSet;
  * 著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
  */
 class Solution {
-    /**
-     * @Description: lengthOfLongestSubstring
-     * @Params: [s]
-     * @Create: 2019/12/1 22:59
-     * @Return: int
-     */
-    public int lengthOfLongestSubstring(String s) {
-        int length = s.length();
-        int answer = 0;
-        HashMap<Character, Integer> hashMap = new HashMap<>();
-        for (int i = 0, j = 0; j < length; j++) {
-            if (hashMap.containsKey(s.charAt(j))) {
-                i = Math.max(i, hashMap.get(s.charAt(j)));
-            }
-            answer = Math.max(answer, j - i + 1);
-            hashMap.put(s.charAt(j), j + 1);
-        }
-        return answer;
-    }
 
     /**
      * @Description: lengthOfLongestSubstring2
@@ -76,6 +57,9 @@ class Solution {
     /**
      * @Description: lengthOfLongestSubstring3
      * 使用HashMap来替代HashSet 原因是 使用HashMap来存储char对应的index , 这样一来, 就不需要每次都查左边坐标元素是否在set里, i可以直接跳到 查到的index+1的位置
+     * 每次进来一个item, 向HashMap里面放置的的是item: index+1
+     * 这样如果进来的元素是重复的, 那么左边坐标为max(i, hashMap取出的index) 这是因为存储的时候已经加一了
+     * 每次更新answer 的加一是因为此时j还没有加一
      * @Params: [s]
      * @Create: 2019/12/1 23:08
      * @Return: int
@@ -86,13 +70,42 @@ class Solution {
         if (s == null) return answer;
         final int length = s.length();
         for (int i = 0, j = 0; j < length; j++) {
-            if (!hashMap.containsKey(s.charAt(j))) {
-                hashMap.put(s.charAt(j), j);
-                answer = Math.max(answer, j - i);
-            } else {
-                i = hashMap.get(s.charAt(j)) + 1;
+            if (hashMap.containsKey(s.charAt(j))) {
+                i = Math.max(i, hashMap.get(s.charAt(j)));
             }
+            answer = Math.max(answer, j - i + 1);
+            hashMap.put(s.charAt(j), j + 1);
         }
         return answer;
+    }
+
+    /**
+     * @Description: lengthOfLongestSubstring4
+     * instead of using hashmap to save the index info, we use simply int array, since we know that there are only const numbers of chars
+     * which means that we have a int[128]
+     * every time an item comes into the window we try to find the max(i, index_array[s.charAt(j)])
+     * in this way, we can avoid the left index leaves the window( goes left)
+     * then we update the answer by comparing the previous answer and current window size
+     * then we update the index array. ( j + 1 means that we can get and use , j + 1 index must be the left side of the window)
+     * @Params: [s]
+     * @Create: 2019/12/2 10:05
+     * @Return: int
+     */
+    public int lengthOfLongestSubstring4(String s) {
+        int answer = 0;
+        int[] index_array = new int[128];
+        if (s == null) return answer;
+        final int length = s.length();
+        for (int i = 0, j = 0; j < length; j++) {
+            i = Math.max(i, index_array[s.charAt(j)]);
+            answer = Math.max(answer, j - i + 1);
+            index_array[s.charAt(j)] = j + 1;
+        }
+        return answer;
+    }
+
+    public static void main(String[] args) {
+        char a = 'A';
+        System.out.println((int) a);
     }
 }
