@@ -1,47 +1,15 @@
+import com.sun.javafx.sg.prism.web.NGWebView;
+
+import java.security.PublicKey;
+
 class Solution {
-    public String longestPalindrome(String s) {
-        int size = s.length();
-        if (size <= 1) {
-            return s;
-        }
-        int longestLength = 1;
-        String toReturn = s.substring(0, 1);
-        boolean[][] isPalindrome = new boolean[size][size];
-        for (int r = 1; r < size; r++) {
-            for (int l = 0; l < r; l++) {
-                if (s.charAt(l) == s.charAt(r) && (r - l <= 2 || isPalindrome[l + 1][r - 1])) {
-                    isPalindrome[l][r] = true;
-                    if (r - l + 1 > longestLength) {
-                        longestLength = r - l + 1;
-                        toReturn = s.substring(l, r + 1);
-                    }
-                }
-            }
-        }
-        return toReturn;
-    }
-
-    private String initString(String s) {
-        int length = s.length();
-        if (length == 0) {
-            return "";
-        }
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append('#');
-        for (int i = 0; i < length; i++) {
-            stringBuilder.append(s.charAt(i));
-            stringBuilder.append('#');
-        }
-        return stringBuilder.toString();
-    }
-
 
     public String longestPalindrome2(String s) {
         int length = s.length();
         if (length == 0) {
             return "";
         }
-        String newString = initString(s);
+        String newString = createFormattedString(s);
         int newLength = newString.length();
         int[] p = new int[newLength];
         int mx = 0;
@@ -53,6 +21,9 @@ class Solution {
             if (i < mx) {
                 if (p[2 * id - i] < mx - i) {
                     p[i] = p[2 * id - i];
+                    needCompute = false;
+                } else if (p[2 * id - i] > mx - i) {
+                    p[i] = mx - i;
                     needCompute = false;
                 } else {
                     p[i] = mx - i;
@@ -70,7 +41,9 @@ class Solution {
             if (i + p[i] > mx) {
                 mx = p[i] + i;
                 id = i;
+                System.out.println("updating mx to " + mx + " and id to " + id);
             }
+
             if (p[i] > longestLength) {
                 maxI = i;
                 longestLength = p[i];
@@ -83,6 +56,11 @@ class Solution {
             System.out.println("-----------");
             for (int k = 0; k < newLength; k++) {
                 System.out.print(newString.charAt(k));
+                System.out.print(' ');
+            }
+            System.out.println("-----------");
+            for (int k = 0; k < newLength; k++) {
+                System.out.print(k);
                 System.out.print(' ');
             }
             System.out.println("-----------");
@@ -125,9 +103,9 @@ class Solution {
      * @Return: void
      */
     public static void main(String[] args) {
-        String test = "abba";
+        String test = "ababa";
         Solution solution = new Solution();
-        System.out.println(solution.longestPalindromeBruteForce(test));
+        System.out.println(solution.longestPalindrome2(test));
     }
 
     /**
@@ -171,4 +149,101 @@ class Solution {
         return toReturn;
     }
 
+    /**
+     * @Description: longestPalindromeDynamicProgramming
+     * use a memo to help find the memo[i][j] = memo[i+1][j-1] and s.charAt(i) == s.charAt(j)
+     * and we test j - i + 1 and the longest length before
+     * if the new one is bigger then
+     * we update the longest length and the string to return
+     * @Params: [s]
+     * @Create: 2019/12/2 16:38
+     * @Return: java.lang.String
+     */
+    public String longestPalindromeDynamicProgramming(String s) {
+        if (s == null) return null;
+        final int length = s.length();
+        if (length <= 1) return s;
+        String toReturn = s.substring(0, 1);
+        boolean[][] memo = new boolean[length][length];
+        int longestLength = 1;
+        for (int right = 1; right < length; right++) {
+            for (int left = 0; left < right; left++) {
+                if (s.charAt(left) == s.charAt(right) && (right - left <= 2 || memo[left + 1][right - 1])) {
+                    memo[left][right] = true;
+                    if (right - left + 1 > longestLength) {
+                        longestLength = right - left + 1;
+                        toReturn = s.substring(left, right + 1);
+                    }
+                }
+            }
+        }
+        return toReturn;
+    }
+
+    /**
+     * @Description: createFormattedString
+     * helper function for manacher approach of longestPalindrome
+     * it accepts a string then use "#" to fill in the gap of the chars ( assuming that char "#" is never used in the string)
+     * for example abc then we return #a#b#c#
+     * advantage: by using this formatting we can turn whatever odd or even length string into odd length new string
+     * @Params: [s]
+     * @Create: 2019/12/2 16:48
+     * @Return: java.lang.String
+     */
+    private String createFormattedString(String s) {
+        final int length = s.length();
+        if (length == 0) {
+            return "";
+        }
+        StringBuilder stringBuilder = new StringBuilder("#");
+        for (int i = 0; i < length; i++) {
+            stringBuilder.append(s.charAt(i));
+            stringBuilder.append("#");
+        }
+        return stringBuilder.toString();
+    }
+
+    /**
+     * @Description: longestPalindromeManacher
+     * manacher approach to solve longest palindrome question:
+     * main idea: we use memo to store the longest length of the string which centered at index id
+     * id means the current center which can have the longest palindrome for now
+     * mx means the right most of the longest palindrome which centered at id
+     * i means the the index we want to compute memo[i]
+     * memo[2 * id - i] which means the longest length of the palindrome which centered at the mirror of the i (based of id)
+     * There are 2 outer case:
+     * 1. i >= mx:
+     *      the memo is useless, then we have to compute the memo by hand ( centered at i , spread out by both left side and right side)
+     * 2. i < mx:
+     *      the memo can help us! there are there inner cases here:
+     *      1: memo[2 * id - i] < mx - i:
+     *          memo[i] = memo[2 * id - i] , simple mirror question
+     *      2: memo[2 * id - i] > mx - i:
+     *          memo[i] = mx - i, because we have the center id ,
+     *          and the left most of the longest palindrome centered at the mirror of i is lefter than the mirror of mx,
+     *          we assume that @1 the longest palindrome which centered at i can be longer,
+     *          but the mx is the right most of the longest palindrome which centered at id,
+     *          since @1 can be longer then the mx can be righter. contradiction! which means rightmost of the longest palindrome
+     *          which centered at i can't be righter than mx.
+     *       3: memo[2 * id - i] = mx - i:
+     *          actually, in this case
+     * @Params: [s]
+     * @Create: 2019/12/2 17:03
+     * @Return: java.lang.String
+     */
+    public String longestPalindromeManacher(String s) {
+        int length = s.length();
+        if (length == 0) {
+            return "";
+        }
+        String newString = createFormattedString(s);
+        int newLength = newString.length();
+        int[] p = new int[newLength];
+        int mx = 0;
+        int id = 0;
+        int maxI = 0;
+        int longestLength = 1;
+        boolean needCompute;
+        return newString;
+    }
 }
