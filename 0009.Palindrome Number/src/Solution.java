@@ -26,11 +26,24 @@
 public class Solution {
     /**
      * @Description: isPalindrome
+     * special situations: negative integers isn't palindrome
+     *                     if the last digit is zero , the integer must be zero = > is palindrome otherwise is not palindrome
+     * we do half reverse, and stop when x is not bigger than the reversed int
+     * if the integer has even length, then x and reversed int must be equal to meet the palindrome condition
+     * if the integer has odd length , then x and reversed int / 10 must be equal to meet the palindrome condition
      * @Params: [x]
      * @Create: 2019/12/3 11:06
      * @Return: boolean
      */
     public boolean isPalindrome(int x) {
-
+        if (x < 0 || (x % 10 == 0 && x != 0)) {
+            return false;
+        }
+        int reversedInt = 0;
+        while (x > reversedInt) {
+            reversedInt = reversedInt * 10 + x % 10;
+            x /= 10;
+        }
+        return x == reversedInt || x == reversedInt / 10;
     }
 }
