@@ -1,3 +1,5 @@
+import javax.xml.ws.Holder;
+
 /**
  * @ClassName: Leetcode->Solution
  * @Description: Write a function to find the longest common prefix string amongst an array of strings.
@@ -130,5 +132,35 @@ public class Solution {
             }
         }
         return left.substring(0, min);
+    }
+
+    public String longestCommonPrefixBinarySearch(String[] strs) {
+        if (strs == null || strs.length == 0) return "";
+        int length = Integer.MAX_VALUE;
+        for (String s : strs) {
+            length = Math.min(length, s.length());
+        }
+        int low = 0;
+        int high = length;
+        int middle;
+        while (low <= high) {
+            middle = (low + high) / 2;
+            if (isCommonPrefix(strs, middle)) {
+                low = middle + 1;
+            } else {
+                high = middle - 1;
+            }
+        }
+        return strs[0].substring(0, (low + high) / 2);
+    }
+
+    private boolean isCommonPrefix(String[] strs, int len) {
+        String candidate = strs[0].substring(0, len);
+        for (int i = 1; i < strs.length; i++) {
+            if (!strs[i].startsWith(candidate)) {
+                return false;
+            }
+        }
+        return true;
     }
 }
